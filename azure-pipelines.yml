@@ -13,6 +13,14 @@ jobs:
       vmImage: 'Ubuntu-16.04'
 
     steps:
+      - checkout: self
+        clean: true
+        fetchDepth: 5
+      - bash: |
+          set -x
+          if [ -n "$(System.PullRequest.SourceCommitId)" ]; then
+            git checkout $(System.PullRequest.SourceCommitId)
+          fi
       - bash: |
           set -x
           git clone -b dashboard --single-branch ${BUILD_REPOSITORY_URI} SimpleITK-dashboard
@@ -40,6 +48,14 @@ jobs:
       vmImage: 'macOS-10.13'
 
     steps:
+      - checkout: self
+        clean: true
+        fetchDepth: 5
+      - bash: |
+          set -x
+          if [ -n "$(System.PullRequest.SourceCommitId)" ]; then
+            git checkout $(System.PullRequest.SourceCommitId)
+          fi
       - bash: |
           set -x
           git clone -b dashboard --single-branch ${BUILD_REPOSITORY_URI} SimpleITK-dashboard
@@ -74,6 +90,12 @@ jobs:
       vmImage: 'vs2017-win2016'
 
     steps:
+      - checkout: self
+        clean: true
+        fetchDepth: 5
+      - script: |
+          if DEFINED SYSTEM_PULLREQUEST_SOURCECOMMITID git checkout $(System.PullRequest.SourceCommitId)
+        displayName: Checkout pull request HEAD
       - bash: |
           set -x
           git clone -b dashboard --single-branch ${BUILD_REPOSITORY_URI} SimpleITK-dashboard
