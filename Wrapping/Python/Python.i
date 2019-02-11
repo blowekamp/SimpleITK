@@ -761,8 +761,8 @@ def GetArrayFromImage(image):
     return numpy.array(arrayView, copy=True)
 
 
-def GetImageFromArray( arr, isVector=None):
-    """Get a SimpleITK Image from a numpy array. If isVector is True, then the Image will have a Vector pixel type, and the last dimension of the array will be considered the component index. By default when isVector is None, 4D images are automatically considered 3D vector images."""
+def GetImageFromArray( arr, isVector=None, outputImage=None):
+    """Get a SimpleITK Image from a numpy array. If isVector is True, then the Image will have a Vector pixel type, and the last dimension of the array will be considered the component index. By default when isVector is None, 4D images are automatically considered 3D vector images. If outpuImage is set then it will contain the output and the outputImage's buffer may be reused. """
 
     if not HAVE_NUMPY:
         raise ImportError('Numpy not available.')
@@ -786,10 +786,17 @@ def GetImageFromArray( arr, isVector=None):
       id = _get_sitk_pixelid( z )
       shape = z.shape[::-1]
 
-    # SimpleITK throws an exception if the image dimension is not supported
-    img = Image( shape, id, number_of_components )
+    if (outputImage and
+        outputImage.GetSize() == shape and
+        outputImage.GetNumberOfComponentsPerPixel() == number_of_components and
+        outputImage.GetPixelIDValue() == id):
+      img = outputImage
+      print("Reusing outputImage's buffer!")
+    else:
+      # SimpleITK throws an exception if the image dimension is not supported
+      img = Image( shape, id, number_of_components )
 
-    _SimpleITK._SetImageFromArray( z.tostring(), img )
+    sitk.SimpleITK._SetImageFromArray( z.tostring(), img )
 
     return img
 %}
