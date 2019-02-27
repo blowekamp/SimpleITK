@@ -32,7 +32,7 @@ jobs:
           env:
             CTEST_OUTPUT_ON_FALURE: 1
             DASHBOARD_BRANCH_DIRECTORY: $(Agent.BuildDirectory)/SimpleITK-dashboard
-            CTEST_BUILD_FLAGS:-j 2
+            CTEST_BUILD_FLAGS: -j 2
             CTEST_CMAKE_GENERATOR: "Unix Makefiles"
             CTEST_CACHE: |
               BUILD_DOCUMENTS:BOOL=OFF
