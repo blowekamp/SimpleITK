@@ -1,0 +1,45 @@
+trigger:
+  batch: true
+pr: none
+jobs:
+  - job: 'LinuxGCC'
+    pool:
+      name: 'Default'
+      demands:
+      - Agent.OS -equals Linux
+      - Agent.Name -equals CentosAgent3
+    strategy:
+      matrix:
+       default: {}
+       devtools-3:
+         env_file: '/opt/rh/devtoolset-3/enable'
+    timeoutInMinutes: 360
+    workspace:
+      clean: all
+    steps:
+        - script: |
+            git clone -b dashboard --single-branch $(Build.Repository.Uri) SimpleITK-dashboard
+          displayName: Download dashboard scripts and testing data
+          workingDirectory: $(Agent.BuildDirectory)
+        - script: |
+            [[ ! -z "$(env_file)" ]] && source $(env_file)
+            cmake --version
+            gcc --version
+            ccache -p
+            ctest -VV -S "$(Build.SourcesDirectory)/Testing/CI/Azure/azure.cmake" -V
+            ccache --show-stats
+          displayName: Build and test
+          env:
+            CTEST_OUTPUT_ON_FALURE: 1
+            DASHBOARD_BRANCH_DIRECTORY: $(Agent.BuildDirectory)/SimpleITK-dashboard
+            CTEST_BUILD_FLAGS:-j 2
+            CTEST_CMAKE_GENERATOR: "Unix Makefiles"
+            CTEST_CACHE: |
+              BUILD_DOCUMENTS:BOOL=OFF
+              BUILD_EXAMPLES:BOOL=ON
+              BUILD_SHARED_LIBS:BOOL=OFF
+              BUILD_TESTING:BOOL=ON
+              WRAP_DEFAULT:BOOL=ON
+              CMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache
+              CMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache
+          workingDirectory: $(Agent.BuildDirectory)
