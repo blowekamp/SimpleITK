@@ -40,4 +40,6 @@ jobs:
               BUILD_SHARED_LIBS:BOOL=OFF
               BUILD_TESTING:BOOL=ON
               WRAP_DEFAULT:BOOL=ON
+              CMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache
+              CMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache
           workingDirectory: $(Agent.BuildDirectory)
