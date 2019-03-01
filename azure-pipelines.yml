@@ -1,6 +1,5 @@
 trigger:
   batch: true
-pr: none
 jobs:
   - job: 'LinuxGCC'
     pool:
@@ -13,6 +12,14 @@ jobs:
        default: {}
        devtools-3:
          env_file: '/opt/rh/devtoolset-3/enable'
+       devtools-4:
+         env_file: '/opt/rh/devtoolset-4/enable'
+       devtools-6:
+         env_file: '/opt/rh/devtoolset-6/enable'
+       devtools-7:
+         env_file: '/opt/rh/devtoolset-7/enable'
+       devtools-8:
+         env_file: '/opt/rh/devtoolset-8/enable'
     timeoutInMinutes: 360
     workspace:
       clean: all
@@ -26,7 +33,7 @@ jobs:
             cmake --version
             gcc --version
             ccache -p
-            ctest -VV -S "$(Build.SourcesDirectory)/Testing/CI/Azure/azure.cmake" -V
+            ctest -V -S "$(Build.SourcesDirectory)/Testing/CI/Azure/azure.cmake" -V
             ccache --show-stats
           displayName: Build and test
           env:
