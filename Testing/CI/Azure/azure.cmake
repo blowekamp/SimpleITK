@@ -22,7 +22,7 @@ function(set_from_env var env_var)
 endfunction()
 
 set_from_env(CTEST_SITE "AGENT_MACHINENAME" REQUIRED)
-set(CTEST_SITE "Azure.${CTEST_SITE}")
+set(CTEST_SITE "$ENV{AGENT_NAME}-Azure.$ENV{AGENT_MACHINENAME}")
 set(CTEST_UPDATE_VERSION_ONLY 1)
 
 include( ProcessorCount )
