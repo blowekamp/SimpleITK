@@ -46,7 +46,7 @@
         "FullConnectivity"
       ],
       "default" : "itk::simple::ConnectedThresholdImageFilter::FaceConnectivity",
-      "itk_type" : "typename FilterType::ConnectivityEnumType",
+      "itk_type" : "typename FilterType::ConnectivityEnumEnum",
       "briefdescriptionSet" : "",
       "detaileddescriptionSet" : "Type of connectivity to use (fully connected OR 4(2D), 6(3D), 2*N(ND) connectivity).",
       "briefdescriptionGet" : "",
