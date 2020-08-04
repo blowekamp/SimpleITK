@@ -28,8 +28,8 @@ file(MAKE_DIRECTORY ${JAVA_BINARY_DIRECTORY})
 
 # Nicely write the bridge code in org/itk/simple
 set(CMAKE_SWIG_OUTDIR ${JAVA_SOURCE_DIRECTORY}/org/itk/simple/)
-set(CMAKE_SWIG_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR} -package "org.itk.simple" ${CMAKE_SWIG_GLOBAL_FLAGS})
-set(SWIG_MODULE_SimpleITKJava_EXTRA_DEPS ${SWIG_EXTRA_DEPS} ${CMAKE_CURRENT_SOURCE_DIR}/Java.i ${CMAKE_CURRENT_SOURCE_DIR}/JavaDoc.i)
+set(CMAKE_SWIG_FLAGS -I${CMAKE_CURRENT_SOURCE_DIR} -package "org.itk.simple" -doxygen ${CMAKE_SWIG_GLOBAL_FLAGS})
+set(SWIG_MODULE_SimpleITKJava_EXTRA_DEPS ${SWIG_EXTRA_DEPS} ${CMAKE_CURRENT_SOURCE_DIR}/Java.i)
 SWIG_add_module ( SimpleITKJava java SimpleITK.i )
 target_link_libraries( ${SWIG_MODULE_SimpleITKJava_TARGET_NAME} ${SimpleITK_LIBRARIES})
 target_include_directories( ${SWIG_MODULE_SimpleITKJava_TARGET_NAME}
