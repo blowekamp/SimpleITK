@@ -48,11 +48,20 @@ if(NOT PYTHON_DEBUG_LIBRARIES AND MSVC)
     PRIVATE
     $<$<CONFIG:Debug>:SWIG_PYTHON_INTERPRETER_NO_DEBUG>)
 endif()
-sitk_target_link_libraries_with_dynamic_lookup( ${SWIG_MODULE_SimpleITKPython_TARGET_NAME} ${PYTHON_LIBRARIES} )
-
-target_include_directories( ${SWIG_MODULE_SimpleITKPython_TARGET_NAME}
+if (Python_FOUND)
+  sitk_target_link_libraries_with_dynamic_lookup( ${SWIG_MODULE_SimpleITKPython_TARGET_NAME} ${Python_LIBRARIES} )
+  target_include_directories( ${SWIG_MODULE_SimpleITKPython_TARGET_NAME}
   PRIVATE
-    ${PYTHON_INCLUDE_DIR} )
+    ${Python_INCLUDE_DIRS} )
+
+else()
+  sitk_target_link_libraries_with_dynamic_lookup(  ${SWIG_MODULE_SimpleITKPython_TARGET_NAME} ${PYTHON_LIBRARIES} )
+  target_include_directories( ${SWIG_MODULE_SimpleITKPython_TARGET_NAME}
+  PRIVATE
+    ${PYTHON_INCLUDE_DIRS} )
+
+endif()
+
 target_include_directories( ${SWIG_MODULE_SimpleITKPython_TARGET_NAME}
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -86,7 +95,11 @@ sitk_strip_target( ${SWIG_MODULE_SimpleITKPython_TARGET_NAME} )
 set( SimpleITK_PYTHON_PACKAGE_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
 file( TO_NATIVE_PATH "${SimpleITK_PYTHON_PACKAGE_DIR}" SimpleITK_PYTHON_PACKAGE_DIR )
 
-set(SimpleITK_PYTHON_TEST_EXECUTABLE "${PYTHON_EXECUTABLE}" CACHE INTERNAL "Python executable for testing." FORCE )
+if (Python_FOUND)
+  set(SimpleITK_PYTHON_TEST_EXECUTABLE "${Python_EXECUTABLE}" CACHE INTERNAL "Python executable for testing." FORCE )
+else()
+  set(SimpleITK_PYTHON_TEST_EXECUTABLE "${PYTHON_EXECUTABLE}" CACHE INTERNAL "Python executable for testing." FORCE )
+endif()
 
 
 configure_file(
