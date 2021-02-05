@@ -262,6 +262,9 @@ target_compile_options( sitkSystemInformationTest
   PRIVATE
     ${SimpleITK_PRIVATE_COMPILE_OPTIONS} )
 
+add_test( NAME sitkCMakeCacheTest COMMAND ${CMAKE_COMMAND} -E cat "${SimpleITK_BINARY_DIR}/CMakeCache.txt" )
+set_tests_properties( sitkCMakeCacheTest PROPERTIES ATTACHED_FILES "${SimpleITK_BINARY_DIR}/CMakeCache.txt" )
+
 
  # CMake 3.10 added this method, to avoid configure time introspection
 if(NOT CMAKE_CROSSCOMPILING)
