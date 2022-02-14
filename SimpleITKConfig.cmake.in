@@ -45,6 +45,9 @@ if(NOT "SimpleITK_VERSION_HASH@" STREQUAL "")
 endif()
 set(SimpleITK_VERSION_COUNT)
 
+if(@SimpleITK_USE_ELASTIX@)
+  set(SimpleITK_USE_ELASTIX ON)
+endif()
 
 
 
