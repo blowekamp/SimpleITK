@@ -373,6 +373,14 @@ else()
   list(APPEND ${CMAKE_PROJECT_NAME}_DEPENDENCIES ITK)
 endif()
 
+#------------------------------------------------------------------------------
+# Elastix
+#------------------------------------------------------------------------------
+option(SimpleITK_USE_ELASTIX "Use the Elastix image registration library" OFF)
+if(SimpleITK_USE_ELASTIX )
+  include(External_Elastix)
+  list(APPEND ${CMAKE_PROJECT_NAME}_DEPENDENCIES Elastix)
+endif()
 
 
 get_cmake_property( _varNames VARIABLES )
