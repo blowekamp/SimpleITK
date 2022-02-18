@@ -1,0 +1,90 @@
+{
+  "name" : "FrequencyBandImageFilter",
+  "template_code_filename" : "ImageFilter",
+  "template_test_filename" : "ImageFilter",
+  "number_of_inputs" : 1,
+  "doc" : "Some global documentation",
+  "pixel_types" : "RealPixelIDTypeList",
+  "filter_type" : "itk::FrequencyBandImageFilter<InputImageType>",
+  "members" : [
+    {
+      "name" : "ActualXDimensionIsOdd",
+      "type" : "bool",
+      "default" : "false",
+      "doc" : "",
+      "briefdescriptionSet" : "",
+      "detaileddescriptionSet" : "Was the original truncated dimension size odd?",
+      "briefdescriptionGet" : "",
+      "detaileddescriptionGet" : "Was the original truncated dimension size odd?"
+    },
+    {
+      "name" : "LowFrequencyThreshold",
+      "type" : "double",
+      "default" : 0.0,
+      "briefdescriptionSet" : "",
+      "detaileddescriptionSet" : "",
+      "briefdescriptionGet" : "",
+      "detaileddescriptionGet" : "Band range: Low threshold/boundary in Hertz"
+    },
+    {
+      "name" : "HighFrequencyThreshold",
+      "type" : "double",
+      "default" : 0.5,
+      "briefdescriptionSet" : "",
+      "detaileddescriptionSet" : "Band range: High threshold/boundary in Hertz",
+      "briefdescriptionGet" : "",
+      "detaileddescriptionGet" : "Band range: High threshold/boundary in Hertz"
+    },
+    {
+      "name" : "PassBand",
+      "type" : "bool",
+      "default" : "true",
+      "briefdescriptionSet" : "",
+      "detaileddescriptionSet" : "Utility method equivalent to: SetPassBand(true) SetPassLowFrequencyThreshold(pass_low_threshold) SetPassHighFrequencyThreshold(pass_high_threshold)\n\n\n\npass_low_threshold\n\nflag to let pass or not low boundary \n\n\n\n\npass_high_threshold\n\nflag to let pass or not high boundary",
+      "briefdescriptionGet" : "",
+      "detaileddescriptionGet" : "True: the band is a PassBand. False: StopBand"
+    },
+    {
+      "name" : "PassLowFrequencyThreshold",
+      "type" : "bool",
+      "default" : "true",
+      "briefdescriptionSet" : "",
+      "detaileddescriptionSet" : "The pixel values that correspond to m_LowFrequencyThreshold are passed to the output image, independent of m_PassBand",
+      "briefdescriptionGet" : "",
+      "detaileddescriptionGet" : "The pixel values that correspond to m_LowFrequencyThreshold are passed to the output image, independent of m_PassBand"
+    },
+    {
+      "name" : "PassHighFrequencyThreshold",
+      "type" : "bool",
+      "default" : "true",
+      "briefdescriptionSet" : "",
+      "detaileddescriptionSet" : "The pixel values that correspond to m_HighFrequencyThreshold are passed to the output image, independent of m_PassBand",
+      "briefdescriptionGet" : "",
+      "detaileddescriptionGet" : "The pixel values that correspond to m_HighFrequencyThreshold are passed to the output image, independent of m_PassBand"
+    },
+    {
+      "name" : "RadialBand",
+      "type" : "bool",
+      "default" : "true",
+      "briefdescriptionSet" : "",
+      "detaileddescriptionSet" : "If true the frequency cut-off uses the radius of the frequency vector. If false, it uses the max absolute value of the frequency vector.",
+      "briefdescriptionGet" : "",
+      "detaileddescriptionGet" : "If true the frequency cut-off uses the radius of the frequency vector. If false, it uses the max absolute value of the frequency vector."
+    }
+  ],
+  "tests" : [
+    {
+      "tag" : "defaults",
+      "description" : "",
+      "settings" : [],
+      "inputs" : [
+        "Input/RA-Slice-Float.nrrd"
+      ]
+    }
+  ],
+  "itk_module" : "ITKImageFrequency",
+  "itk_group" : "FFT",
+  "in_place" : true,
+  "detaileddescription" : "The default filtering functor filters in the range LowFrequencyThreshold and HighFrequencyThreshold - pass band between threshold frequencies [0,0.5] Hz or [0, pi] radians, where both boundary values also pass (equivalent to SetPassBand(true,true)). A pass band sets to zero any value outside the defined range, and let pass without modification the input image inside the band.\n\nInstead, a stop band can be set between the threshold values. In this case, the delimited band acts as a stop band, setting values to zero in this range, and does not modify input image values outside this range. Set a stop band using SetPassBand(false), but it is clearer to use SetStopBand(bool, bool) that also control behaviour at band boundaries.\n\nThe boundaries of the bands are controlled with SetPassLow(High)FrequencyThreshold(bool). The default is to let pass low and high boundaries. Also, SetPassBand(true, false), will let pass low boundary/threshold, and stop the high value.\n\nThis filter derives from UnaryFrequencyDomainFilter and implements its own custom functor. If a different functor is set, the normal functionality of this filter will be lost.\n\n\\see UnaryFrequencyDomainFilter",
+  "briefdescription" : "Performs a frequency band filtering on a frequency domain image."
+}
