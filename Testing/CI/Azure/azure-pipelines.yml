@@ -179,7 +179,7 @@ jobs:
         condition: succeededOrFailed()
         displayName: 'Publish test results'
       - bash : |
-          rm -rf ${COREBINARYDIRECTORY}/ITK ${COREBINARYDIRECTORY}/ITK-build ${COREBINARYDIRECTORY}/SimpleITK-build
+          rm -rf ${COREBINARYDIRECTORY}/ITK ${COREBINARYDIRECTORY}/ITK-build ${COREBINARYDIRECTORY}/SimpleITK-build ${COREBINARYDIRECTORY}/Elastix ${COREBINARYDIRECTORY}/Elastix-build
         displayName: Cleanup build
       - script: |
           call  "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" ${{ variables.VCVAR_OPTIONS }} -vcvars_ver=14.0
