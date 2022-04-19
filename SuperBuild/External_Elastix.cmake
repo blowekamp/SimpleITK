@@ -5,6 +5,12 @@ set( ELASTIX_GIT_REPOSITORY ${git_protocol}://github.com/SuperElastix/elastix )
 # Commit 024897 = ENH: Support CMake based client project to build against the install dir
 set( ELASTIX_GIT_TAG 02489736455ad9893856ccb376f616b7305d0a6a )
 
+if( NOT ${BUILD_SHARED_LIBS} )
+  list( APPEND ep_elastix_args
+    "-DCMAKE_C_VISIBILITY_PRESET:STRING=hidden"
+    "-DCMAKE_CXX_VISIBILITY_PRESET:STRING=hidden"
+    "-DITK_TEMPLATE_VISIBILITY_DEFAULT:BOOL=OFF" )
+endif()
 
 ExternalProject_Add( ${proj}
   GIT_REPOSITORY ${ELASTIX_GIT_REPOSITORY}
@@ -18,6 +24,7 @@ ExternalProject_Add( ${proj}
   --no-warn-unused-cli
   -C "${CMAKE_CURRENT_BINARY_DIR}/${proj}-build/CMakeCacheInit.txt"
   ${ep_common_args}
+  ${ep_elastix_args}
   -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
   -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=ON
   -DBUILD_TESTING:BOOL=OFF
