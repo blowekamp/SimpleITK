@@ -138,7 +138,6 @@ set ( SimpleITK_INCLUDE_DIRS
 set ( SimpleITK_LIBRARIES SimpleITKCommon SimpleITKIO SimpleITKRegistration )
 
 if (SimpleITK_USE_ELASTIX)
-  include(${CMAKE_BINARY_DIR}/../Elastix-build/ElastixTargets.cmake)
   list (APPEND SimpleITK_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/Code/ElastixTransformixWrappers/include)
   list (APPEND SimpleITK_LIBRARIES ElastixImageFilter TransformixImageFilter)
 endif()

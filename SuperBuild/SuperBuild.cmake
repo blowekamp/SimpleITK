@@ -458,6 +458,7 @@ ExternalProject_Add(${proj}
     -DWRAP_CSHARP:BOOL=${WRAP_CSHARP}
     -DWRAP_R:BOOL=${WRAP_R}
     -DBUILD_EXAMPLES:BOOL=${BUILD_TESTING}
+    -DElastix_DIR:PATH=${Elastix_DIR}
   DEPENDS ${${CMAKE_PROJECT_NAME}_DEPENDENCIES}
   ${External_Project_USES_TERMINAL}
   STEP_TARGETS configure build doc forcebuild

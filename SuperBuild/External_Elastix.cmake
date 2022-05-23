@@ -124,5 +124,5 @@ ExternalProject_Add( ${proj}
   BUILD_ALWAYS 0
 )
 
-ExternalProject_Get_Property( Elastix BINARY_DIR )
-set( Elastix_DIR ${BINARY_DIR} )
+ExternalProject_Get_Property( ${proj} install_dir )
+set( Elastix_DIR "${install_dir}/lib/cmake/elastix")
