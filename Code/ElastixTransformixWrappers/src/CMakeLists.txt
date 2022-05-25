@@ -1,10 +1,6 @@
 
 find_package(Elastix REQUIRED)
 
-# included for the "transformix_lib" library
-include(${ELASTIX_CONFIG_TARGETS_FILE})
-
-
 add_library( ElastixImageFilter sitkElastixImageFilter.cxx  sitkElastixImageFilterImpl.cxx )
 target_include_directories( ElastixImageFilter
   PUBLIC
