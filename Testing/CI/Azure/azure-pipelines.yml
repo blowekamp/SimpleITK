@@ -12,7 +12,6 @@ trigger:
       - docs/
       - Documentation/
       - Utilities/
-pr: none
 
 jobs:
   - job: Linux
@@ -122,8 +121,7 @@ jobs:
       - script: |
           python --version
           python -m pip install --upgrade pip
-          python -m pip install setuptools wheel
-          python -m pip install ninja
+          python -m pip install cmake
         displayName: 'Install ninja dependency'
       - script: |
           cmake --version
