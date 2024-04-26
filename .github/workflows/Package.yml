@@ -38,7 +38,7 @@ jobs:
         working-directory: Utilities/Distribution/manylinux
         run: |
           mkdir -p Utilities/Distribution/manylinux/wheelhouse
-          touch Utilities/Distribution/manylinux/wheelhouse/SimpleITK-${{ matrix.os }}.whl
+          echo "data" > Utilities/Distribution/manylinux/wheelhouse/SimpleITK-${{ matrix.os }}.whl
       - name: ls
         shell: bash
         working-directory: Utilities/Distribution/manylinux
@@ -141,8 +141,8 @@ jobs:
             BUILD_TESTING:BOOL=ON
             ${{ matrix.ctest-cache }}
         run: |
-          mkdir ${{ github.workspace }}/artifacts
-          touch ${{ github.workspace }}/artifacts/SimpleITK-${{ matrix.os }}.whl
+          mkdir artifacts
+          echo "test" > artifacts/SimpleITK-${{ matrix.os }}.whl
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -150,3 +150,54 @@ jobs:
           path: |
             ${{ github.workspace }}/artifacts/*.whl
             ${{ github.workspace }}/artifacts/*.zip
+  publish:
+    if: github.ref == 'refs/tags/latest'
+    needs:
+      - build
+      - package-docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        id: download
+      - name: Checksums
+        shell: bash
+        run: |
+          sha256sum $( find  ${{ steps.download.outputs.download-path }} -type f -name "*.whl" -o -name "*.zip" ) > checksums.txt
+          echo "== checksums.txt =="
+          cat checksums.txt
+      - name: Create Release Notes
+        shell: bash
+        run: |
+          echo "This is an automatic pre-release packaging of SimpleITK based on the master branch. It contains the latest features and experimental developments.
+
+          To upgrade to the latest pre-release Python binary package run:
+          \`\`\`pip install --upgrade --pre SimpleITK --find-links https://github.com/SimpleITK/SimpleITK/releases/tag/latest\`\`\`
+          " >notes.txt
+
+          for f in $( find ${{ steps.download.outputs.download-path }} -type f  )
+          do
+
+            if [[ $f == *.whl ]]; then
+              md5=$(md5sum  $f | awk '{ print $1 }')
+              echo  -n "<a href=\"https://github.com/SimpleITK/SimpleITK/releases/download/latest/$(basename $f)#${md5}\"></a>" >> notes.txt
+            fi
+          done
+          echo "== notes.txt =="
+          cat notes.txt
+
+      - name: Create Release and Upload Artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          gh release create ${TAG_NAME}-draft \
+            --target ${{ github.sha }} \
+            --draft \
+            --generate-notes \
+            --prerelease \
+            --notes-file notes.txt \
+            --title "Release ${{ github.ref_name }}"
+          gh release upload ${TAG_NAME}-draft $( find  ${{ steps.download.outputs.download-path }} -type f -name "*.whl" -o -name "*.zip" )
