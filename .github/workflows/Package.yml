@@ -2,250 +2,23 @@ name: Package
 
 on:
   push:
-    tags:
-      - 'latest'
-      - 'v*'
-    branches-ignore:
-      - '**'
+    branches:
+      - '*'
   pull_request:
     paths:
       - .github/workflows/Package.yml
   workflow_dispatch:
 
-concurrency:
-  group: '${{ github.workflow }}@${{ github.event.pull_request.head.sha || github.head_ref || github.ref }}'
 
 jobs:
-  package-docker:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        include:
-          - os: self-hosted-arm
-            dockerfile: Dockerfile-2014-aarch64
-          - os: ubuntu-latest
-            dockerfile: Dockerfile-2014-x86_64
 
-
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Docker Build Image
-        shell: bash
-        working-directory: Utilities/Distribution/manylinux
-        run: |
-          docker build --pull=true --rm=true -t simpleitk_manylinux -f "${{ matrix.dockerfile }}"   .
-      - name: Build ${{ matrix.dockerfile }}
-        shell: bash
-        working-directory: Utilities/Distribution/manylinux
-        env:
-          PYTHON_VERSIONS: "cp38-cp38 cp39-cp39 cp310-cp310"
-          BUILD_CSHARP: ${{ contains(matrix.os, 'arm') && '0' || '1' }}
-          BUILD_JAVA: 1
-          BUILD_PYTHON_LIMITED_API: 1
-        run: |
-          echo "BUILD_CSHARP: ${BUILD_CSHARP}"
-          echo "BUILD_JAVA: ${BUILD_JAVA}"
-          docker run --rm \
-               --user "$(id -u):$(id -g)" \
-               --env SIMPLEITK_GIT_TAG=${{github.ref}} \
-               --env PYTHON_VERSIONS \
-               --env BUILD_CSHARP \
-               --env BUILD_JAVA \
-               --env BUILD_PYTHON_LIMITED_API \
-               -v "$(pwd):/work/io" \
-               -t simpleitk_manylinux
-      - name: ls
-        shell: bash
-        working-directory: Utilities/Distribution/manylinux
-        run: |
-          ls -lhR .
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifacts-${{ matrix.os }}
-          path: |
-            Utilities/Distribution/manylinux/wheelhouse/*.whl
-            Utilities/Distribution/manylinux/SimpleITK*.zip
-
-  build:
-
-
-    # The CMake configure and build commands are platform-agnostic and should work a cross
-    # platforms.
-    if: github.repository == 'SimpleITK/SimpleITK'
-    runs-on: ${{ matrix.os }}
-    env:
-      COREBINARYDIRECTORY:  "${{ github.workspace }}/bld"
-      ExternalData_OBJECT_STORES: "${{ github.workspace }}/.ExternalData"
-      DASHBOARD_BRANCH_DIRECTORY: "${{ github.workspace }}/SimpleITK-dashboard"
-      CTEST_SOURCE_DIRECTORY: "${{ github.workspace }}"
-      CTEST_CONFIGURATION_TYPE: "${{ matrix.cmake-build-type }}"
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        include:
-          - os: macos-13
-            cmake-build-type: "Release"
-            cmake-generator: "Ninja"
-            ctest-cache: |
-              CMAKE_CXX_FLAGS:STRING=-fvisibility=hidden -fvisibility-inlines-hidden
-              CMAKE_C_FLAGS:STRING=-fvisibility=hidden
-              CMAKE_OSX_DEPLOYMENT_TARGET=10.9
-              ITK_C_OPTIMIZATION_FLAGS:STRING=
-              ITK_CXX_OPTIMIZATION_FLAGS:STRING=
-              SimpleITK_BUILD_DISTRIBUTE:BOOL=ON
-          - os: windows-2022
-            cmake-build-type: "Release"
-            cmake-generator: "Visual Studio 17 2022"
-            cmake-generator-toolset: v142,host=x64
-            cmake-generator-platform: x64
-            ctest-cache: |
-              BUILD_EXAMPLES:BOOL=ON
-              BUILD_TESTING:BOOL=ON
-              ITK_C_OPTIMIZATION_FLAGS:STRING=
-              ITK_CXX_OPTIMIZATION_FLAGS:STRING=
-              SimpleITK_BUILD_DISTRIBUTE:BOOL=ON
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/checkout@v4
-        with:
-          path: SimpleITK-dashboard
-          ref: dashboard
-      - name: Generate External Data Hash
-        shell: bash
-        run: |
-          mkdir -p ${ExternalData_OBJECT_STORES}
-          ls -la "${{ github.workspace }}/Testing/Data/"
-          git log -n 1 "${{ github.workspace }}/Testing/Data/" | tee "${{ github.workspace }}/external-data.hashable"
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: ${{ env.ExternalData_OBJECT_STORES }}
-          key: external-data-v1-${{ hashFiles( format( '{0}/{1}', github.workspace, 'external-data.hashable') ) }}
-          enableCrossOsArchive: true
-          restore-keys: |
-            external-data-v1-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        id: cpy
-        with:
-          python-version: 3.11
-
-      - name: Install build dependencies
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install ninja cmake~=3.29.0
-
-          if [  ! -z "${{ matrix.xcode-version }}" ]; then
-            sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode-version }}.app/Contents/Developer/
-            xcode-select -p
-          fi
-
-      - name: Build and Test
-        shell: bash
-        env:
-          ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: 2
-          CTEST_BINARY_DIRECTORY: "${{ env.COREBINARYDIRECTORY }}"
-          CTEST_CMAKE_GENERATOR: "${{ matrix.cmake-generator }}"
-          CTEST_CMAKE_GENERATOR_TOOLSET: "${{ matrix.cmake-generator-toolset }}"
-          CTEST_CMAKE_GENERATOR_PLATFORM: "${{ matrix.cmake-generator-platform }}"
-          CTEST_OUTPUT_ON_FAILURE: 1
-          CTEST_CACHE: |
-            WRAP_DEFAULT:BOOL=OFF
-            BUILD_EXAMPLES:BOOL=ON
-            BUILD_TESTING:BOOL=ON
-            ${{ matrix.ctest-cache }}
-        run: |
-          cmake --version
-          ninja --version
-          ctest -D "dashboard_track:STRING=Package" -S ${CTEST_SOURCE_DIRECTORY}/.github/workflows/github_actions.cmake -VV
-
-      - name: Generate Source and Data Archives
-        shell: bash
-        if: matrix.os == 'macos-13'
-        run: |
-          set -xe
-
-          Utilities/Maintenance/SourceTarball.bash --tgz --zip --verbose "${{ env.COREBINARYDIRECTORY }}/SimpleITK-build" ${{ github.sha }}
-          mkdir -p ${{ github.workspace }}/artifacts
-          ls -la
-          shopt -s extglob
-          mv SimpleITK@(Data|)-*@(zip|gz) ${{ github.workspace }}/artifacts
-
-      - name: Cleanup build
-        shell: bash
-        run: |
-          rm -rf ${COREBINARYDIRECTORY}/ITK ${COREBINARYDIRECTORY}/ITK-build
-          rm -rf ${COREBINARYDIRECTORY}/SimpleITK-build
-
-      - name: Package CSharp
-        uses: ./.github/actions/package_csharp
-        with:
-          continue-on-error: true
-
-      - name: Package Java
-        uses: ./.github/actions/package_java
-        with:
-          continue-on-error: true
-
-      - name: Package Python 3.11
-        uses: ./.github/actions/package_python
-        with:
-          python-version: 3.11
-          use_limited_api: true
-      - name: Package Python 3.10
-        uses: ./.github/actions/package_python
-        with:
-          python-version: "3.10"
-
-      - name: Package Python 3.9
-        uses: ./.github/actions/package_python
-        with:
-          python-version: 3.9
-
-      - name: Package Python 3.8
-        uses: ./.github/actions/package_python
-        with:
-          python-version: 3.8
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifacts-${{ matrix.os }}
-          path: |
-            ${{ github.workspace }}/artifacts/*.whl
-            ${{ github.workspace }}/artifacts/*.zip
-            ${{ github.workspace }}/artifacts/*.gz
 
   publish:
-    if: github.ref_name == 'latest' || startsWith(github.ref_name, 'v')
-    needs:
-      - build
-      - package-docker
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v4
-        id: download
-        with:
-          path: ${{ github.workspace }}/artifacts
-      - name: Checksums
-        shell: bash
-        run: |
-          sha256sum $( find  ${{ steps.download.outputs.download-path }} -type f -name "*.gz" "*.whl" -o -name "*.zip" ) > checksums.txt
-          echo "== checksums.txt =="
-          cat checksums.txt
       - name: Set tag name
         id: tag
         run: |
@@ -262,14 +35,6 @@ jobs:
           \`\`\`pip install --upgrade --pre SimpleITK --find-links https://github.com/SimpleITK/SimpleITK/releases/tag/${{ steps.tag.outputs.name }}\`\`\`
           " >notes.txt
 
-          for f in $( find ${{ steps.download.outputs.download-path }} -type f  )
-          do
-
-            if [[ $f == *.whl ]]; then
-              md5=$(md5sum  $f | awk '{ print $1 }')
-              echo  -n "<a href=\"https://github.com/SimpleITK/SimpleITK/releases/download/${{ steps.tag.outputs.name }}/$(basename $f)#${md5}\"></a>" >> notes.txt
-            fi
-          done
           echo "== notes.txt =="
           cat notes.txt
 
@@ -288,13 +53,12 @@ jobs:
 
           gh release create ${{ steps.tag.outputs.name }} \
             --target ${{ github.sha }} \
-            --verify-tag \
             --draft \
             --generate-notes \
             $create_args \
             --notes-file notes.txt \
             --title "Release ${{ github.ref_name }}"
-          gh release upload ${{ steps.tag.outputs.name }} $( find  ${{ steps.download.outputs.download-path }} -type f -name "*.whl" -o -name "*.zip" -o -name "*.gz" )
+          #gh release upload ${{ steps.tag.outputs.name }} $( find  ${{ steps.download.outputs.download-path }} -type f -name "*.whl" -o -name "*.zip" -o -name "*.gz" )
 
           if [ "${{ steps.tag.outputs.name }}" == "latest" ]; then
             gh release edit ${{ steps.tag.outputs.name }} --draft=false
