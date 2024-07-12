@@ -271,7 +271,7 @@ jobs:
       - name: Checksums
         shell: bash
         run: |
-          sha256sum $( find  ${{ steps.download.outputs.download-path }} -type f -name "*.gz" "*.whl" -o -name "*.zip" ) > checksums.txt
+          sha256sum $( find  ${{ steps.download.outputs.download-path }} -type f -name "*.whl" -o -name "*.zip" -o -name "*.gz" ) > checksums.txt
           echo "== checksums.txt =="
           cat checksums.txt
       - name: Set tag name
