@@ -96,9 +96,7 @@ jobs:
       - name: Check Git state
         run: |
           git status
-          git log -n 1
-          git branch
-          git remote -v
+          git describe
       - name: Build and Test
         shell: bash
         env:
