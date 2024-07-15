@@ -16,61 +16,6 @@ concurrency:
   group: '${{ github.workflow }}@${{ github.event.pull_request.head.sha || github.head_ref || github.ref }}'
 
 jobs:
-  package-docker:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        include:
-          - os: self-hosted-arm
-            dockerfile: Dockerfile-2014-aarch64
-          - os: ubuntu-latest
-            dockerfile: Dockerfile-2014-x86_64
-
-
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Docker Build Image
-        shell: bash
-        working-directory: Utilities/Distribution/manylinux
-        run: |
-          docker build --pull=true --rm=true -t simpleitk_manylinux -f "${{ matrix.dockerfile }}"   .
-      - name: Build ${{ matrix.dockerfile }}
-        shell: bash
-        working-directory: Utilities/Distribution/manylinux
-        env:
-          PYTHON_VERSIONS: "cp38-cp38 cp39-cp39 cp310-cp310"
-          BUILD_CSHARP: ${{ contains(matrix.os, 'arm') && '0' || '1' }}
-          BUILD_JAVA: 1
-          BUILD_PYTHON_LIMITED_API: 1
-        run: |
-          echo "BUILD_CSHARP: ${BUILD_CSHARP}"
-          echo "BUILD_JAVA: ${BUILD_JAVA}"
-          docker run --rm \
-               --user "$(id -u):$(id -g)" \
-               --env SIMPLEITK_GIT_TAG=${{github.ref}} \
-               --env PYTHON_VERSIONS \
-               --env BUILD_CSHARP \
-               --env BUILD_JAVA \
-               --env BUILD_PYTHON_LIMITED_API \
-               -v "$(pwd):/work/io" \
-               -t simpleitk_manylinux
-      - name: ls
-        shell: bash
-        working-directory: Utilities/Distribution/manylinux
-        run: |
-          ls -lhR .
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifacts-${{ matrix.os }}
-          path: |
-            Utilities/Distribution/manylinux/wheelhouse/*.whl
-            Utilities/Distribution/manylinux/SimpleITK*.zip
 
   build:
 
@@ -149,7 +94,12 @@ jobs:
             sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode-version }}.app/Contents/Developer/
             xcode-select -p
           fi
-
+      - name: Check Git state
+        run: |
+          git status
+          git log -n 1
+          git branch
+          git remote -v
       - name: Build and Test
         shell: bash
         env:
@@ -225,105 +175,3 @@ jobs:
             ${{ github.workspace }}/artifacts/*.whl
             ${{ github.workspace }}/artifacts/*.zip
             ${{ github.workspace }}/artifacts/*.gz
-  doxygen:
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Build Docker Image for Doxygen
-        run: |
-          cd $GITHUB_WORKSPACE/Utilities/Doxygen/docker
-          docker build -f Dockerfile -t simpleitk-doxygen .
-      - name: Docker Doxygen generation
-        run: |
-          docker run \
-                 --mount type=bind,source=$GITHUB_WORKSPACE,destination=/work/SimpleITK,readonly \
-                 --name sitk-dox simpleitk-doxygen
-          mkdir -p artifacts
-          docker cp sitk-dox:/SimpleITKDoxygen.tar.gz artifacts/SimpleITKDoxygen-${GITHUB_SHA}.tar.gz
-          docker cp sitk-dox:/SimpleITKDoxygenXML.tar.gz artifacts/SimpleITKDoxygenXML-${GITHUB_SHA}.tar.gz
-      - name: Archive Doxygen Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: doxygen-xml
-          path: |
-            artifacts/SimpleITKDoxygenXML-*.tar.gz
-            artifacts/SimpleITKDoxygen-*.tar.gz
-
-  publish:
-    if: github.ref_name == 'latest' || startsWith(github.ref_name, 'v')
-    needs:
-      - build
-      - doxygen
-      - package-docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/download-artifact@v4
-        id: download
-        with:
-          path: ${{ github.workspace }}/artifacts
-      - name: Checksums
-        shell: bash
-        run: |
-          sha256sum $( find  ${{ steps.download.outputs.download-path }} -type f -name "*.gz" "*.whl" -o -name "*.zip" ) > checksums.txt
-          echo "== checksums.txt =="
-          cat checksums.txt
-      - name: Set tag name
-        id: tag
-        run: |
-          echo "TAG NAME: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "name=${{github.ref_name}}" >> $GITHUB_OUTPUT
-      - name: Create Release Notes
-        shell: bash
-        run: |
-          echo "Tag Name: ${{ steps.tag.outputs.name }}"
-          echo "
-          This is an automatic pre-release packaging of SimpleITK based on the master branch. It contains the latest features and experimental developments.
-
-          To upgrade to the latest pre-release Python binary package run:
-          \`\`\`pip install --upgrade --pre SimpleITK --find-links https://github.com/SimpleITK/SimpleITK/releases/tag/${{ steps.tag.outputs.name }}\`\`\`
-          " >notes.txt
-
-          for f in $( find ${{ steps.download.outputs.download-path }} -type f  )
-          do
-
-            if [[ $f == *.whl ]]; then
-              md5=$(md5sum  $f | awk '{ print $1 }')
-              echo  -n "<a href=\"https://github.com/SimpleITK/SimpleITK/releases/download/${{ steps.tag.outputs.name }}/$(basename $f)#${md5}\"></a>" >> notes.txt
-            fi
-          done
-          echo "== notes.txt =="
-          cat notes.txt
-
-      - name: Create Release and Upload Artifacts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ "${{ steps.tag.outputs.name }}" == "latest" ]; then
-            gh release delete ${{ steps.tag.outputs.name }} --yes || true
-          fi
-
-          if [[  "${{ steps.tag.outputs.name }}" == "latest" ||
-              "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?((-.)?[a-zA-Z]+[0-9]*)?$ ]]; then
-            create_args="--prerelease"
-          fi
-
-          gh release create ${{ steps.tag.outputs.name }} \
-            --target ${{ github.sha }} \
-            --verify-tag \
-            --draft \
-            --generate-notes \
-            $create_args \
-            --notes-file notes.txt \
-            --title "Release ${{ github.ref_name }}"
-          gh release upload ${{ steps.tag.outputs.name }} $( find  ${{ steps.download.outputs.download-path }} -type f -name "*.whl" -o -name "*.zip" -o -name "*.gz" )
-
-          if [ "${{ steps.tag.outputs.name }}" == "latest" ]; then
-            gh release edit ${{ steps.tag.outputs.name }} --draft=false
-          fi
