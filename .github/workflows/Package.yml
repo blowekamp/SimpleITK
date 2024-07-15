@@ -22,7 +22,6 @@ jobs:
 
     # The CMake configure and build commands are platform-agnostic and should work a cross
     # platforms.
-    if: github.repository == 'SimpleITK/SimpleITK'
     runs-on: ${{ matrix.os }}
     env:
       COREBINARYDIRECTORY:  "${{ github.workspace }}/bld"

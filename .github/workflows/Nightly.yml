@@ -33,6 +33,7 @@ jobs:
               echo "### Updated latest tag and triggered Package workflow" >> $GITHUB_STEP_SUMMARY
           fi
   matrix-jobs:
+    if: github.repository == 'SimpleITK/SimpleITK'
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.name }}
     strategy:
