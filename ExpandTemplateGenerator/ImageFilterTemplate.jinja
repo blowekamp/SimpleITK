@@ -1,0 +1,21 @@
+# This is a Jinja2 template for generating code or tests for SimpleITK filters.
+
+# Filter Name: {{ name }}
+
+{% if doc %}# Documentation: {{ doc }}{% endif %}
+
+# Number of Inputs: {{ number_of_inputs }}
+
+{% for member in members %}
+# Member: {{ member.name }}
+# Type: {{ member.type }}
+# Default: {{ member.default }}
+{% if member.doc %}# Description: {{ member.doc }}{% endif %}
+{% endfor %}
+
+# Tests:
+{% for test in tests %}
+# Test Tag: {{ test.tag }}
+# Description: {{ test.description }}
+# Inputs: {{ test.inputs | join(', ') }}
+{% endfor %}

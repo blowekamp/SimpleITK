@@ -58,10 +58,6 @@
 #endif
 
 
-#if !defined(SITK_RETURN_SELF_TYPE_HEADER)
-#  define SITK_RETURN_SELF_TYPE_HEADER Self &
-#endif
-
 namespace itk::simple
 {
 
