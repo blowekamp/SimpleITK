@@ -96,7 +96,7 @@ set(proj ITK) ## Use ITK convention of calling it ITK
 
 set(
   ITK_GIT_REPOSITORY
-  "${git_protocol}://github.com/InsightSoftwareConsortium/ITK.git"
+  "${git_protocol}://github.com/blowekamp/ITK.git"
   CACHE STRING
   "URL of ITK Git repository"
 )
@@ -104,7 +104,7 @@ mark_as_advanced(ITK_GIT_REPOSITORY)
 sitk_legacy_naming(ITK_GIT_REPOSITORY ITK_REPOSITORY)
 
 # Using ITK 6.0 Beta 1
-set(_DEFAULT_ITK_GIT_TAG "v6.0b01")
+set(_DEFAULT_ITK_GIT_TAG "cmake_interface_module")
 set(ITK_GIT_TAG "${_DEFAULT_ITK_GIT_TAG}" CACHE STRING "Tag in ITK git repo")
 mark_as_advanced(ITK_GIT_TAG)
 set(
