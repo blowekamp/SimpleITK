@@ -173,16 +173,17 @@ jobs:
       uses: actions/cache@v5
       with:
         path: ${{ runner.temp }}/.ccache
-        key: ccache-v1-${{ matrix.name }}-${{ github.base_ref || github.ref_name }}-${{ github.sha }}
+        key: ccache-v1-${{ matrix.name }}-${{ github.head_ref && format('{0}-{1}', github.base_ref, github.head_ref) || github.ref_name }}-${{ github.sha }}
         restore-keys: |
-          ccache-v1-${{ matrix.name }}-${{ github.base_ref || github.ref_name }}-
+          ccache-v1-${{ matrix.name }}-${{ github.head_ref && format('{0}-{1}', github.base_ref, github.head_ref) || github.ref_name }}-
+          ccache-v1-${{ matrix.name }}-${{ github.head_ref && github.base_ref || github.ref_name }}-
           ccache-v1-${{ matrix.name }}-
     - name: Configure ccache
       if: matrix.use-ccache
       run: |
         echo "CCACHE_DIR=${{ runner.temp }}/.ccache" >> "$GITHUB_ENV"
         echo "CCACHE_NODIRECT=1" >> "$GITHUB_ENV"
-        ccache --max-size=2.0G
+        ccache --max-size=400M
         ccache --zero-stats
         ccache --show-config
     - name: Build and Test
