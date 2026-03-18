@@ -396,6 +396,21 @@ TEST_F(Image, Transforms)
     EXPECT_EQ(.5, idx[1]) << " Idx to Pt [1]";
     EXPECT_EQ(.5, idx[2]) << " Idx to Pt [2]";
   }
+
+  // Dimension mismatch errors
+  {
+    std::vector<double>  wrongPt(2, 0.0);
+    std::vector<int64_t> wrongIdx(2, 0);
+
+    EXPECT_ANY_THROW(shortImage->TransformPhysicalPointToIndex(wrongPt))
+      << "TransformPhysicalPointToIndex dimension mismatch";
+    EXPECT_ANY_THROW(shortImage->TransformIndexToPhysicalPoint(wrongIdx))
+      << "TransformIndexToPhysicalPoint dimension mismatch";
+    EXPECT_ANY_THROW(shortImage->TransformPhysicalPointToContinuousIndex(wrongPt))
+      << "TransformPhysicalPointToContinuousIndex dimension mismatch";
+    EXPECT_ANY_THROW(shortImage->TransformContinuousIndexToPhysicalPoint(wrongPt))
+      << "TransformContinuousIndexToPhysicalPoint dimension mismatch";
+  }
 }
 
 TEST_F(Image, Properties)
@@ -1602,6 +1617,49 @@ TEST_F(Image, GetBuffer)
   ASSERT_ANY_THROW(img.GetBufferAsInt32()) << " Get with wrong type";
   ASSERT_ANY_THROW(img.GetBufferAsUInt32()) << " Get with wrong type";
   ASSERT_ANY_THROW(img.GetBufferAsFloat()) << " Get with wrong type";
+
+  // Verify const overloads and GetBufferAsVoid
+  img = sitk::Image(10, 10, sitk::sitkUInt8);
+  EXPECT_NE(img.GetBufferAsVoid(), nullptr) << "non-const GetBufferAsVoid";
+  EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsVoid(), nullptr) << "const GetBufferAsVoid";
+  EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsUInt8(), nullptr) << "const GetBufferAsUInt8";
+
+  img = sitk::Image(10, 10, sitk::sitkInt8);
+  EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsInt8(), nullptr) << "const GetBufferAsInt8";
+
+  img = sitk::Image(10, 10, sitk::sitkInt16);
+  EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsInt16(), nullptr) << "const GetBufferAsInt16";
+
+  img = sitk::Image(10, 10, sitk::sitkUInt16);
+  EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsUInt16(), nullptr) << "const GetBufferAsUInt16";
+
+  img = sitk::Image(10, 10, sitk::sitkInt32);
+  EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsInt32(), nullptr) << "const GetBufferAsInt32";
+
+  img = sitk::Image(10, 10, sitk::sitkUInt32);
+  EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsUInt32(), nullptr) << "const GetBufferAsUInt32";
+
+  if (sitk::sitkInt64 != sitk::sitkUnknown)
+  {
+    img = sitk::Image(10, 10, sitk::sitkInt64);
+    EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsInt64(), nullptr) << "const GetBufferAsInt64";
+  }
+  if (sitk::sitkUInt64 != sitk::sitkUnknown)
+  {
+    img = sitk::Image(10, 10, sitk::sitkUInt64);
+    EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsUInt64(), nullptr) << "const GetBufferAsUInt64";
+  }
+
+  img = sitk::Image(10, 10, sitk::sitkFloat32);
+  EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsFloat(), nullptr) << "const GetBufferAsFloat";
+
+  img = sitk::Image(10, 10, sitk::sitkFloat64);
+  EXPECT_NE(static_cast<const sitk::Image &>(img).GetBufferAsDouble(), nullptr) << "const GetBufferAsDouble";
+
+  // GetBuffer is not supported for label map images
+  img = sitk::Image(10, 10, sitk::sitkLabelUInt8);
+  EXPECT_ANY_THROW(img.GetBufferAsUInt8()) << "GetBufferAs on label image";
+  EXPECT_ANY_THROW(img.GetBufferAsVoid()) << "GetBufferAsVoid on label image";
 }
 
 
@@ -1788,6 +1846,10 @@ TEST_F(Image, ProxyForInPlaceOperation)
   proxyImage.SetPixelAsVectorUInt8({ 0, 1 }, { 3, 2, 1 });
   EXPECT_EQ(proxyImage.GetPixelAsVectorUInt8({ 0, 1 }), std::vector<uint8_t>({ 3, 2, 1 }));
   EXPECT_EQ(img2.GetPixelAsVectorUInt8({ 0, 1 }), std::vector<uint8_t>({ 3, 2, 1 }));
+
+  // ProxyCopy is not supported for label pixel types
+  sitk::Image labelImg(10, 10, sitk::sitkLabelUInt8);
+  EXPECT_ANY_THROW(labelImg.ProxyForInPlaceOperation()) << "ProxyCopy on label image";
 }
 
 TEST_F(Image, MoveOperations)
