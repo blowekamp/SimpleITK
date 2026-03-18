@@ -25,7 +25,7 @@ Prerequisites
 
 To build SimpleITK you need:
 
--  A recent version of `CMake <http://www.cmake.org/>`__ >= 3.16.3 with SSL
+-  A recent version of `CMake <http://www.cmake.org/>`__ >= 3.23.0 with SSL
    support for https.
 -  A supported :ref:`compiler <FAQ-compiler-supported>`.
 -  To use the latest developmental version, source code can be
@@ -60,11 +60,16 @@ Before you start please make sure you have the required `Prerequisites`_ install
 For some environments we have short cuts, scripts, for automated
 building of SimpleITK (see their repository for more details):
 
--  For **Python**: The
-   `scikit-build <https://github.com/scikit-build/scikit-build>`__ based
-   distutils based `setup.py
-   frontend <https://github.com/SimpleITK/SimpleITKPythonPackage>`__ can be
-   used to build, install, and package SimpleITK for Python.
+-  For **Python**: SimpleITK can be built and installed directly from the
+   source repository using ``pip``::
+
+     pip install .
+
+   The top-level ``pyproject.toml`` uses
+   `scikit-build-core <https://scikit-build-core.readthedocs.io/>`__ to
+   automatically fetch ITK via CMake ``FetchContent`` and compile both ITK
+   and SimpleITK. Build dependencies (``swig``, ``jinja2``, ``pyyaml``, etc.)
+   are declared in ``pyproject.toml`` and installed automatically by ``pip``.
 
 -  For the **R language** (version 3.3 or greater): A remotes installer and instructions are
    available from `this GitHub
@@ -169,7 +174,7 @@ These additional dependencies are required when not using the SuperBuild:
    with SimpleITK, as future ITK versions are generally backwards
    compatible.
 
-#. `Python <https://www.python.org>`__ >= 3.9 with
+#. `Python <https://www.python.org>`__ >= 3.10 with
    `Jinja2 <https://jinja.palletsprojects.com/en/stable/>`__ is required
    for code generation of the SimpleITK core C++ library.
 

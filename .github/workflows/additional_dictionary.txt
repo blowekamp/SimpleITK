@@ -889,6 +889,7 @@ argonne
 args
 argv
 arity
+arr
 asarray
 ascontiguousarray
 asin
@@ -1830,6 +1831,7 @@ pypa
 pypi
 pypistats
 pyplot
+pyproject
 pyyaml
 qe
 ql
@@ -2077,6 +2079,7 @@ tmpfile
 toctree
 todo
 todogroup
+toml
 toolkits
 toolset
 tparam
