@@ -27,6 +27,7 @@ SimpleITK are currently available for all three major operating systems
    migrationGuide2.0
    FilterTemplates
    link_examples
+   release_notes/index
 
 
 Relevant Resources
