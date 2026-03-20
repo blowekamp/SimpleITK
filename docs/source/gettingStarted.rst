@@ -153,7 +153,7 @@ Latest binaries
 
 If the latest SimpleITK bug fixes and features are required then
 pre-release binaries are available. The pre-release binaries are built
-from the actively developed master branch. The SimpleITK packages are
+from the actively developed main branch. The SimpleITK packages are
 available on `Github releases
 <https://github.com/SimpleITK/SimpleITK/releases/tag/latest>`__ under
 the "latest" tag. The packages include Python, CSharp and Java. To

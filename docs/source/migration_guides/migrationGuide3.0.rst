@@ -5,7 +5,7 @@ Migration Guide 3.0
 
 With the release of SimpleITK 3.0 there are changes to the interface and to the behaviour of some methods and classes. The intent of this document is to provide guidance on how to modify code so that it is compatible with SimpleITK 3.0.
 
-This document will continue to evolve after the SimpleITK 3.0 release, consider reading the `latest <https://simpleitk.readthedocs.io/en/master/migrationGuide3.0.html>`__ version. Contributions to update this document that share problems and solutions when updating to SimpleITK 3.0 are welcomed.
+This document will continue to evolve after the SimpleITK 3.0 release, consider reading the `latest <https://simpleitk.readthedocs.io/en/main/migrationGuide3.0.html>`__ version. Contributions to update this document that share problems and solutions when updating to SimpleITK 3.0 are welcomed.
 
 
 
