@@ -60,7 +60,7 @@ repos:
   hooks:
     - id: comment-spell-check
       args: ['--miss', '--dict','.github/workflows/additional_dictionary.txt']
-      exclude: Ancillary/
+      exclude: Ancillary/|docs/source/release_notes/
 - repo: local
   hooks:
     - id: local-prepare-commit-msg

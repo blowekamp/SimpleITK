@@ -54,6 +54,7 @@ extensions = [
     'sphinx_exec_code',
     'sphinx_tabs.tabs',
     'sphinx_toolbox.collapse',
+    'myst_parser',
 ]
 
 # The working directory where the code will be executed from the source directory.
@@ -65,8 +66,7 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The master toctree document.
 master_doc = 'index'

@@ -1,0 +1,31 @@
+# SimpleITK Release v1.0rc1
+
+- Key Improvements:
+  - Improved Python data bridge
+    - New Python method `GetArrayViewFromImage` provides copy free read-only access
+    - Updated Python data structures to use `memory view` objects
+  - Building SimpleITK wrappers:
+    - R devtools based installer (https://github.com/SimpleITK/SimpleITKRInstaller).
+    - Python: scripts for building wheels (https://github.com/SimpleITK/SimpleITKPythonPackage) and a Conda recipe (https://github.com/SimpleITK/SimpleITKCondaRecipe).
+  - Support use of virtual image domain in the `ImageRegistrationMethod`.
+  - OnePlusOneOptimizer added to registration framework.
+  - Improved support for R: propogating C++ exceptions into R, additional R tests.
+  - Additional tests for Java.
+  - Python and R notebooks repository illustrating the basics and more advanced functionality of SimpleITK (https://github.com/InsightSoftwareConsortium/SimpleITK-Notebooks).
+  - Added continous integration via CircleCI.
+  - Updated version and improved integration of Google Test.
+  - Updated ITK version to 4.11
+  - Updated minimal required CMake version to 3.0, and numerous CMake changes to support various build configurations.
+  - Updated to usage of SWIG 3.0.11 ( using the latest SIWG is strongly recommended for R )
+  - Reorganized examples directory into example based sub-directories with multiple languages
+  - Improvements to documentation transmogrification scripts
+  - Many bug fixes and improvement to the build system!
+- API changes:
+  - R methods which previously unnecessarily returned self return void.
+  - New method `Image::GetNumberOfPixels`
+  - New method `LabelMapContourOverlayImageFilter::SetColormap`
+  - New method `LabelMapToRGBImageFilter::SetColormap`
+  - New method `ImageRegistrationMethod::SetVirtualDomain`
+  - New method `ImageRegistrationMethod::SetVirtualDomainFromImage`
+  - New seed parameter to `ImageRegistrationMethod::AddMetricSamplingSeed` method
+  - `CastImageFilter::SetOutputPixelType` method no longer accepts the pixel ID by value, uses only enumerated type.
