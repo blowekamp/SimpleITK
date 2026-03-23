@@ -1,8 +1,8 @@
 sphinx-tabs
 cmake
 sphinx_rtd_theme
-sphinx~=5.3.0
-sphinx_exec_code==0.8
-simpleitk~=2.5.2
-sphinx-toolbox~=3.4.0
-myst_parser~=5.0.0
+myst_parser
+sphinx~=7.4.7
+sphinx_exec_code~=0.18
+simpleitk~=2.5.3
+sphinx-toolbox~=4.1.2
