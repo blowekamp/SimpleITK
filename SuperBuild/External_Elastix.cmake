@@ -10,8 +10,8 @@ file(
 )
 
 set(ELASTIX_GIT_REPOSITORY ${git_protocol}://github.com/SuperElastix/elastix)
-# May 13, 2024 compatibility with ITKv6 dev
-set(ELASTIX_GIT_TAG 3bcb0104940876da37e91ea8da9e96b25081b21f)
+# March 20, 2026 release
+set(ELASTIX_GIT_TAG 5.3.1)
 
 if(NOT ${BUILD_SHARED_LIBS})
   list(
