@@ -154,7 +154,7 @@ if(SimpleITK_USE_ELASTIX)
     SimpleITK_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/Code/ElastixTransformixWrappers/include
   )
-  cache_list_append( SimpleITK_LIBRARIES ElastixImageFilter TransformixImageFilter)
+  cache_list_append( SimpleITK_LIBRARIES SimpleElastix)
 endif()
 
 if(SimpleITK_EXPLICIT_INSTANTIATION)

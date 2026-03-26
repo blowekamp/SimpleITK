@@ -21,7 +21,7 @@
 #include "sitkMacro.h"
 
 #if defined(SITKDLL)
-#  ifdef SITKElastix_EXPORTS
+#  ifdef SimpleElastix_EXPORTS
 #    define SITKElastix_EXPORT SITK_ABI_EXPORT
 #  else
 #    define SITKElastix_EXPORT SITK_ABI_IMPORT
