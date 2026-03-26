@@ -1,7 +1,11 @@
 find_package(Elastix CONFIG REQUIRED)
 
-# included for the "transformix_lib" library
-include(${ELASTIX_CONFIG_TARGETS_FILE})
+# Include the targets file when Elastix was found as a pre-installed package.
+# When Elastix is built via FetchContent the targets already exist in the build
+# and must not be imported again.
+if(ELASTIX_CONFIG_TARGETS_FILE AND NOT TARGET elastix_lib)
+  include(${ELASTIX_CONFIG_TARGETS_FILE})
+endif()
 
 set(
   use_itk_modules
