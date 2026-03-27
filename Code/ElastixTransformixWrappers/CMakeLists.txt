@@ -1,4 +1,4 @@
-find_package(Elastix REQUIRED)
+find_package(Elastix CONFIG REQUIRED)
 
 # included for the "transformix_lib" library
 include(${ELASTIX_CONFIG_TARGETS_FILE})
@@ -12,92 +12,48 @@ set(
 )
 
 add_library(
-  ElastixImageFilter
+  SimpleElastix
   src/sitkElastixImageFilter.cxx
   src/sitkElastixImageFilterImpl.cxx
+  src/sitkTransformixImageFilter.cxx
+  src/sitkTransformixImageFilterImpl.cxx
 )
 
-# Add headers using FILE_SET for automatic include directory management and installation
 target_sources(
-  ElastixImageFilter
+  SimpleElastix
   PUBLIC
     FILE_SET HEADERS
       BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
       FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/sitkElastixImageFilter.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/sitkElastixTransformixWrappers.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/sitkTransformixImageFilter.h
   PRIVATE
     FILE_SET private_headers
       TYPE HEADERS
       BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
-      FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/sitkElastixImageFilterImpl.h
+      FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/sitkElastixImageFilterImpl.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/sitkTransformixImageFilterImpl.h
 )
 
-# FILE_SET automatically adds BASE_DIRS to INCLUDE_DIRECTORIES and INTERFACE_INCLUDE_DIRECTORIES
-# Additional private includes for Elastix
-target_include_directories(ElastixImageFilter PRIVATE ${ELASTIX_INCLUDE_DIRS})
+target_include_directories(SimpleElastix PRIVATE ${ELASTIX_INCLUDE_DIRS})
 
 target_link_libraries(
-  ElastixImageFilter
+  SimpleElastix
   PUBLIC
     SimpleITKCommon
   PRIVATE
     SimpleITK_ITKCommon
     ${ELASTIX_LIBRARIES}
+    ${use_itk_modules}
 )
 target_compile_options(
-  ElastixImageFilter
+  SimpleElastix
   PUBLIC
     ${SimpleITK_PUBLIC_COMPILE_OPTIONS}
   PRIVATE
     ${SimpleITK_PRIVATE_COMPILE_OPTIONS}
 )
-target_compile_features(ElastixImageFilter PUBLIC cxx_std_17)
-target_link_libraries(ElastixImageFilter PRIVATE ${use_itk_modules})
-sitk_install_exported_target( ElastixImageFilter )
-
-add_library(
-  TransformixImageFilter
-  src/sitkTransformixImageFilter.cxx
-  src/sitkTransformixImageFilterImpl.cxx
-)
-
-# Add headers using FILE_SET for automatic include directory management and installation
-target_sources(
-  TransformixImageFilter
-  PUBLIC
-    FILE_SET HEADERS
-      BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
-      FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/sitkTransformixImageFilter.h
-  PRIVATE
-    FILE_SET private_headers
-      TYPE HEADERS
-      BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
-      FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/sitkTransformixImageFilterImpl.h
-)
-
-# FILE_SET automatically adds BASE_DIRS to INCLUDE_DIRECTORIES and INTERFACE_INCLUDE_DIRECTORIES
-# Additional private includes for Elastix
-target_include_directories(
-  TransformixImageFilter
-  PRIVATE
-    ${ELASTIX_INCLUDE_DIRS}
-)
-
-target_link_libraries(
-  TransformixImageFilter
-  PUBLIC
-    SimpleITKCommon
-    SimpleITK_ITKCommon
-    ${ELASTIX_LIBRARIES}
-)
-target_compile_options(
-  TransformixImageFilter
-  PUBLIC
-    ${SimpleITK_PUBLIC_COMPILE_OPTIONS}
-  PRIVATE
-    ${SimpleITK_PRIVATE_COMPILE_OPTIONS}
-)
-target_compile_features(TransformixImageFilter PUBLIC cxx_std_17)
-target_link_libraries(TransformixImageFilter PRIVATE ${use_itk_modules})
-sitk_install_exported_target( TransformixImageFilter )
+target_compile_features(SimpleElastix PUBLIC cxx_std_17)
+sitk_install_exported_target(SimpleElastix)
