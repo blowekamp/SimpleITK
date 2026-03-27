@@ -13,9 +13,33 @@
 # Make sure find package macros are included
 include(FindPackageHandleStandardArgs)
 
+set(_R_WINDOWS_HINTS)
+if(WIN32)
+  list(
+    APPEND
+    _R_WINDOWS_HINTS
+    "[HKEY_CURRENT_USER\\Software\\R-core\\R;InstallPath]/bin/x64"
+  )
+  list(
+    APPEND
+    _R_WINDOWS_HINTS
+    "[HKEY_LOCAL_MACHINE\\Software\\R-core\\R;InstallPath]/bin/x64"
+  )
+  list(
+    APPEND
+    _R_WINDOWS_HINTS
+    "[HKEY_CURRENT_USER\\Software\\R-core\\R;InstallPath]/bin"
+  )
+  list(
+    APPEND
+    _R_WINDOWS_HINTS
+    "[HKEY_LOCAL_MACHINE\\Software\\R-core\\R;InstallPath]/bin"
+  )
+endif()
+
 set(TEMP_CMAKE_FIND_APPBUNDLE ${CMAKE_FIND_APPBUNDLE})
 set(CMAKE_FIND_APPBUNDLE "NEVER")
-find_program(R_COMMAND R DOC "R executable.")
+find_program(R_COMMAND R HINTS ${_R_WINDOWS_HINTS} DOC "R executable.")
 if(R_COMMAND)
   execute_process(
     WORKING_DIRECTORY .
@@ -36,7 +60,14 @@ if(R_COMMAND)
   )
 endif(R_COMMAND)
 
-find_program(RSCRIPT_EXECUTABLE Rscript DOC "Rscript executable.")
+find_program(
+  RSCRIPT_EXECUTABLE
+  Rscript
+  HINTS
+    ${R_HOME}
+    ${_R_WINDOWS_HINTS}
+  DOC "Rscript executable."
+)
 
 set(CMAKE_FIND_APPBUNDLE ${TEMP_CMAKE_FIND_APPBUNDLE})
 
@@ -57,15 +88,44 @@ find_path(
     R/include
   DOC "Path to file R.h"
 )
+if(MINGW)
+  # On Windows with a MinGW/Rtools toolchain, R does not install a static import
+  # library (libR.a or R.lib). Instead the R runtime is provided as R.dll located
+  # in R's bin/x64/ directory.  MinGW's linker (ld) can link directly against a
+  # .dll file: it reads the DLL's export table and synthesises the import stubs
+  # automatically, so no separate .dll.a import library is required.
+  #
+  # The resulting SimpleITK R package .dll will have a dynamic dependency on
+  # R.dll, which is resolved at load time when R executes `useDynLib(SimpleITK)`
+  # (i.e. when the user calls `library(SimpleITK)`).  This mirrors how libR.so is
+  # used on Linux — the package shared library is loaded into the live R process
+  # and the R API symbols are resolved from R's own address space.
+  #
+  # We temporarily add .dll to CMAKE_FIND_LIBRARY_SUFFIXES so that find_library()
+  # will locate R.dll, then restore the original suffixes immediately afterwards.
+  list(APPEND CMAKE_FIND_LIBRARY_SUFFIXES .dll)
+
+  list(
+    APPEND
+    _R_LIBRARY_PATH_SUFFIXES
+    /bin
+    /bin/x64
+  )
+endif()
+
 find_library(
   R_LIBRARY_BASE
   R
   PATHS
-    ${R_BASE_DIR}
+    ${R_HOME}
   PATH_SUFFIXES
-    /lib
-  DOC "R library (example libR.a, libR.dylib, etc.)."
+    ${_R_LIBRARY_PATH_SUFFIXES}
+  DOC "R library (example libR.a, libR.dylib, R.dll, etc.)."
 )
+
+if(MINGW)
+  list(POP_BACK CMAKE_FIND_LIBRARY_SUFFIXES)
+endif()
 
 set(R_LIBRARIES ${R_LIBRARY_BASE})
 mark_as_advanced(
@@ -82,9 +142,9 @@ set(
   R_COMMAND
 )
 
-if(APPLE)
-  # On linux platform some times the libR.so is not available, however
-  # on apple a link error results if the library is linked.
+if(NOT LINUX)
+  # On Linux the libR.so is sometimes not available; on all other platforms
+  # a link error results if the library is not found.
   list(
     APPEND
     _REQUIRED_R_VARIABLES
