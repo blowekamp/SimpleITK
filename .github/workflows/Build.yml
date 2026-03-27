@@ -53,13 +53,14 @@ jobs:
               CMAKE_CXX_VISIBILITY_PRESET:STRING=hidden
               CMAKE_VISIBILITY_INLINES_HIDDEN:BOOL=ON
               SimpleITK_EXPLICIT_INSTANTIATION:BOOL=ON
-          - os: mac-arm64
+          - os: mac-arm64-elastix-python
             name: mac-arm64-python
             cmake-build-type: "Release"
             cmake-generator: "Ninja"
             use-superbuild: false
             ctest-cache: |
               WRAP_PYTHON:BOOL=ON
+              SimpleITK_USE_ELASTIX:BOOL=ON
           - os: ubuntu-24.04
             name: linux-x64-superbuild-elastix-python
             cmake-build-type: "Release"
