@@ -68,8 +68,8 @@ struct ImageTypeToPixelIDValue<itk::ImageBase<VImageDimension>>
  * different configurations for SimpleITK could result in different
  * values for pixelID. So these enumerated values should be used.
  *
- * Additionally, not all PixelID an instantiated in for the tool
- * kit. If a PixelID is not instantiated then it's value is
+ * Additionally, not all PixelIDs are instantiated in all toolkit
+ * configurations. If a PixelID is not instantiated then it's value is
  * -1. Therefore it is likely that multiple elements in the
  * enumeration will have a zero value. Therefore the first preferred
  * method is to use "if" statements, with the first branch checking
