@@ -49,6 +49,7 @@ build_simpleitk() {
         -DITK_GIT_REPOSITORY:STRING="https://github.com/InsightSoftwareConsortium/ITK.git" \
         -DITK_C_OPTIMIZATION_FLAGS:STRING="" \
         -DITK_CXX_OPTIMIZATION_FLAGS:STRING="" \
+        ${SIMPLEITK_USE_ELASTIX:+-DSimpleITK_USE_ELASTIX:BOOL=ON} \
         ${SRC_DIR}/SuperBuild &&
     make  &&
     find ./ -name \*.o -delete
@@ -79,6 +80,7 @@ build_simpleitk_python() {
         -DSimpleITK_BUILD_STRIP:BOOL=ON \
         -DSimpleITK_PYTHON_WHEEL:BOOL=ON \
         -DSimpleITK_Python_EXECUTABLE:FILEPATH=${SimpleITK_Python_EXECUTABLE} \
+        ${SIMPLEITK_PYTHON_PACKAGE_NAME:+-DSimpleITK_PYTHON_PACKAGE_NAME:STRING=${SIMPLEITK_PYTHON_PACKAGE_NAME}} \
         -DPython_EXECUTABLE:FILEPATH=${Python_EXECUTABLE} \
         -DPython_INCLUDE_DIR:PATH=${Python_INCLUDE_DIR} \
         ${SRC_DIR}/Wrapping/Python &&
