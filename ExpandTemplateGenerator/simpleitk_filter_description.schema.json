@@ -54,7 +54,7 @@
     },
     "vector_pixel_types_broadcast": {
       "type": "string",
-      "description": "Vector pixel types (a type list, same convention as 'pixel_types') that may pair directly -- with no per-component decomposition -- with 'BasicPixelIDTypeList' in either image argument position of the main two-full-image dispatch. Used to enable e.g. 'vectorImage op scalarImage' and 'scalarImage op vectorImage' without enabling 'vectorImage op vectorImage'. Only supported by 'BinaryFunctorFilter' for a simple two-image filter with no extra 'inputs' (optional)."
+      "description": "Vector pixel types (a type list, same convention as 'pixel_types') that may pair directly -- with no per-component decomposition -- with 'BasicPixelIDTypeList' in either image argument position of the main two-full-image dispatch. Only the position-matched pair (e.g. VectorFloat32 with BasicFloat32) is registered for each entry, not the full cross product with 'BasicPixelIDTypeList', to avoid a combinatorial explosion of template instantiations; this list must therefore have the same length and component-type order as 'BasicPixelIDTypeList'. Used to enable e.g. 'vectorImage op scalarImage' and 'scalarImage op vectorImage' without enabling 'vectorImage op vectorImage'. Only supported by 'BinaryFunctorFilter' for a simple two-image filter with no extra 'inputs' (optional)."
     },
     "output_pixel_type": {
       "type": "string",

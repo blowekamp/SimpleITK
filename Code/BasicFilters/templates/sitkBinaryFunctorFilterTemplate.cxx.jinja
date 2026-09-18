@@ -63,10 +63,13 @@ const detail::DualMemberFunctionFactory<{{ name }}::MemberFunctionType> &{{ name
 {
   static detail::DualMemberFunctionFactory<MemberFunctionType> static_factory = [] {
     detail::DualMemberFunctionFactory<MemberFunctionType> factory;
-    factory.RegisterMemberFunctions< {{ vector_pixel_types_broadcast }}, BasicPixelIDTypeList, 3 >();
-    factory.RegisterMemberFunctions< {{ vector_pixel_types_broadcast }}, BasicPixelIDTypeList, 2 >();
-    factory.RegisterMemberFunctions< BasicPixelIDTypeList, {{ vector_pixel_types_broadcast }}, 3 >();
-    factory.RegisterMemberFunctions< BasicPixelIDTypeList, {{ vector_pixel_types_broadcast }}, 2 >();
+    // Only register position-matched pairs (e.g. VectorFloat32 with BasicFloat32),
+    // not the full cross product -- avoids ~10x more template instantiations for
+    // combinations (e.g. VectorInt8 with BasicFloat64) nobody needs.
+    factory.RegisterMemberFunctionsZipped< {{ vector_pixel_types_broadcast }}, BasicPixelIDTypeList, 3 >();
+    factory.RegisterMemberFunctionsZipped< {{ vector_pixel_types_broadcast }}, BasicPixelIDTypeList, 2 >();
+    factory.RegisterMemberFunctionsZipped< BasicPixelIDTypeList, {{ vector_pixel_types_broadcast }}, 3 >();
+    factory.RegisterMemberFunctionsZipped< BasicPixelIDTypeList, {{ vector_pixel_types_broadcast }}, 2 >();
     return factory;
   }();
   return static_factory;
