@@ -1568,11 +1568,27 @@ TEST(BasicFilters, Multiply_VectorAndComplexConstant)
   EXPECT_THROW(sitk::Multiply(vecImage, vecImage), sitk::GenericException);
 
   // vector * scalar-Image (a second full Image, as opposed to a scalar
-  // constant) also remains unsupported -- only the constant overloads
-  // were changed, not the two-full-image dispatch.
+  // constant): each vector component is multiplied by the scalar image's
+  // value at that pixel, via the main two-full-image dispatch.
   sitk::Image scalarImage({ 2, 2 }, sitk::sitkFloat32);
-  EXPECT_THROW(sitk::Multiply(vecImage, scalarImage), sitk::GenericException);
-  EXPECT_THROW(sitk::Multiply(scalarImage, vecImage), sitk::GenericException);
+  scalarImage.SetPixelAsFloat({ 0, 0 }, 2.0);
+  scalarImage.SetPixelAsFloat({ 1, 0 }, 0.5);
+  scalarImage.SetPixelAsFloat({ 0, 1 }, -2.0);
+  scalarImage.SetPixelAsFloat({ 1, 1 }, 1.0);
+
+  const std::vector<std::vector<float>> expectedScaled = {
+    { 2.0, 4.0, 6.0 }, { 2.0, 2.5, 3.0 }, { 3.0, 0.0, -5.0 }, { 10.0, -20.0, 0.25 }
+  };
+
+  for (const auto & result : { sitk::Multiply(vecImage, scalarImage), sitk::Multiply(scalarImage, vecImage) })
+  {
+    EXPECT_EQ(result.GetPixelID(), sitk::sitkVectorFloat32);
+    EXPECT_EQ(result.GetNumberOfComponentsPerPixel(), 3u);
+    for (size_t i = 0; i < idxs.size(); ++i)
+    {
+      EXPECT_EQ(expectedScaled[i], result.GetPixelAsVectorFloat32(idxs[i]));
+    }
+  }
 
   // Add/Subtract already supported vector+constant before this change; lock in
   // that behavior stays correct now that they share the updated template.
