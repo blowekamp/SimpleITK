@@ -67,6 +67,7 @@
 #include <sitkLessImageFilter.h>
 #include <sitkLessEqualImageFilter.h>
 #include <sitkDivideRealImageFilter.h>
+#include <sitkDivideImageFilter.h>
 
 #include "itkVectorImage.h"
 #include "itkVector.h"
@@ -1619,4 +1620,17 @@ TEST(BasicFilters, DivideRealImageFilter_ConstantFullPrecision)
   image.SetPixelAsUInt8({ 0, 0 }, 10);
 
   EXPECT_NEAR(20.0, sitk::DivideReal(image, 0.5).GetPixelAsDouble({ 0, 0 }), 1e-9);
+}
+
+TEST(BasicFilters, DivideImageFilter_ConstantFullPrecision)
+{
+  // A fractional divisor must be applied at double precision, not truncated
+  // to the image's integer pixel type before the division runs (0.5
+  // truncating to 0 would trip the filter's divide-by-zero guard and
+  // saturate to the pixel type's max value instead of computing 10/0.5).
+  namespace sitk = itk::simple;
+  sitk::Image image = sitk::Image({ 1, 1 }, sitk::sitkUInt8);
+  image.SetPixelAsUInt8({ 0, 0 }, 10);
+
+  EXPECT_EQ(20u, sitk::Divide(image, 0.5).GetPixelAsUInt8({ 0, 0 }));
 }
